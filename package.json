@@ -1,0 +1,42 @@
+{
+  "name": "agent_test",
+  "version": "1.0.0",
+  "description": "Phase 2: Agentic Batching Engine with Gemini API integration",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markaxelus/agent_test.git"
+  },
+  "keywords": [
+    "ai",
+    "batching",
+    "gemini",
+    "simulation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/markaxelus/agent_test/issues"
+  },
+  "homepage": "https://github.com/markaxelus/agent_test#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "joi": "^18.0.2",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.2.2"
+  }
+}
