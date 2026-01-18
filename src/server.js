@@ -1,32 +1,30 @@
 const express = require('express');
-const config = require('./config')
-const { simulationRateLimiter } = require('./middleware')
-
+const config = require('./config');
+const { simulationRateLimiter } = require('./middleware/rateLimiter');
+const simulateRoute = require('./routes/simulate');
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/simulate', simulationRateLimiter, simulateRoute);
 
 app.get('/', (req, res) => {
   res.json({
     service: 'Gemini Agentic Batching Engine',
-    version: '4.0.0',
-    description: 'Phase 4: Advanced archetype-based simulation with rich context',
+    version: '1.0.0',
+    description: 'AI agent simulation with personas',
     endpoints: {
-      health: 'GET /health',
-      simulate: 'POST /api/simulate (Phase 3)',
-      advancedSimulate: 'POST /api/simulate/advanced',
-      personaMemory: 'GET /api/simulate/advanced/memory/:personaId',
-    },
-    features: {
-      phase3: ['AEGIS governance', 'Social influence', 'Basic memory', 'Chain-of-thought'],
-      phase4: ['7 archetypes', 'Dynamic context', 'Visit history', 'Price anchoring', 'Habit formation', 'Batch processing']
+      simulate: 'POST /api/simulate'
     },
     model: config.gemini.model,
-    personas: 50,
-    archetypes: 7
+    personas: 5
   });
-})
+});
+
+const PORT = config.server.port;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 

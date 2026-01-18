@@ -19,4 +19,4 @@ const simulationRateLimiter = rateLimit({
     });
   }
 });
-module.exports = apiRateLimiter;
+module.exports = { simulationRateLimiter };

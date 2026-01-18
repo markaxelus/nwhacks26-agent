@@ -6,7 +6,7 @@ const personas = [
   { id: 3, name: "Deal Hunter Dana", age: 31, income: 38000, shoppingBehavior: "opportunistic", priceSensitivity: "high", preferredEvents: ["flash-sale", "daily-deal"] },
   { id: 4, name: "Coupon Carl", age: 55, income: 42000, shoppingBehavior: "strategic", priceSensitivity: "very-high", preferredEvents: ["bogo", "percentage-off"] },
   { id: 5, name: "Thrifty Tina", age: 24, income: 32000, shoppingBehavior: "minimalist", priceSensitivity: "high", preferredEvents: ["seasonal-sale", "student-discount"] },
-  { id: 6, name: "Penny-Pincher Pete", age: 38, income: 40000, shoppingBehavior: "comparison-shopper", priceSensitivity: "very-high", preferredEvents: ["price-match", "lowest-price"] },
+  /* { id: 6, name: "Penny-Pincher Pete", age: 38, income: 40000, shoppingBehavior: "comparison-shopper", priceSensitivity: "very-high", preferredEvents: ["price-match", "lowest-price"] },
   { id: 7, name: "Economical Ella", age: 29, income: 36000, shoppingBehavior: "value-seeker", priceSensitivity: "high", preferredEvents: ["bundle-deal", "multi-buy"] },
   { id: 8, name: "Saver Sam", age: 47, income: 44000, shoppingBehavior: "cautious", priceSensitivity: "very-high", preferredEvents: ["end-of-season", "warehouse-sale"] },
   { id: 9, name: "Budget-Smart Brenda", age: 33, income: 39000, shoppingBehavior: "planned", priceSensitivity: "high", preferredEvents: ["holiday-sale", "anniversary-sale"] },
@@ -58,7 +58,7 @@ const personas = [
   { id: 47, name: "Loyal Larry", age: 60, income: 52000, shoppingBehavior: "brand-devoted", priceSensitivity: "low", preferredEvents: ["loyalty-rewards", "points-multiplier"] },
   { id: 48, name: "Skeptical Shannon", age: 49, income: 61000, shoppingBehavior: "cautious-researcher", priceSensitivity: "high", preferredEvents: ["money-back-guarantee", "trial-period"] },
   { id: 49, name: "Social-Influenced Sienna", age: 22, income: 41000, shoppingBehavior: "peer-driven", priceSensitivity: "medium", preferredEvents: ["viral-product", "social-proof"] },
-  { id: 50, name: "Analytical Arthur", age: 56, income: 78000, shoppingBehavior: "data-obsessed", priceSensitivity: "medium", preferredEvents: ["comparison-chart", "specs-detailed"] }
+  { id: 50, name: "Analytical Arthur", age: 56, income: 78000, shoppingBehavior: "data-obsessed", priceSensitivity: "medium", preferredEvents: ["comparison-chart", "specs-detailed"] } */
 ];
 
 
