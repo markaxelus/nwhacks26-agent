@@ -1,10 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const config = require('./config');
 const { simulationRateLimiter } = require('./middleware/rateLimiter');
 const simulateRoute = require('./routes/simulate');
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

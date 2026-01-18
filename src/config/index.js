@@ -14,6 +14,10 @@ const config = {
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000,
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 10
+  },
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    key: process.env.SUPABASE_KEY
   }
 };
 
