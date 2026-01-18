@@ -1,4 +1,7 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env'), debug: true });
+console.log('[Config] Loading config. Gemini Key present:', !!process.env.GEMINI_API_KEY, 'Length:', process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0);
+
 
 const config = {
   gemini: {

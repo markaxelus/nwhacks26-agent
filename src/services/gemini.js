@@ -46,8 +46,10 @@ async function generateInsight(results, summary, businessState) {
     const result = await model.generateContent(prompt);
     return result.response.text();
   } catch (error) {
-    console.error("[Gemini] Error generating insight:", error);
-    return "Unable to generate insights at this time.";
+    const fs = require('fs');
+    fs.appendFileSync('gemini_errors.log', `${new Date().toISOString()} - [Gemini Error] ${error.message}\n${error.stack}\n\n`);
+    console.error("[Gemini] Error generating insight:", error.message);
+    return "Unable to generate insights at this time. Check gemini_errors.log for details.";
   }
 }
 

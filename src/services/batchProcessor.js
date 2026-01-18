@@ -13,7 +13,7 @@ const { OPENAI_PERSONAS } = require('./oPersonas');
 const { generateCompleteContext, calculateEffectivePriceSensitivity } = require('./contextGenerator');
 const { getEnhancedMemoryState, recordVisit, updateTrustWithEmotion } = require('./enhancedMemory');
 
-const BATCH_SIZE = 10; // Process 10 personas at a time
+const BATCH_SIZE = 3; // Process 3 personas at a time to avoid rate limits
 
 /**
  * Calculate market momentum from processed results
