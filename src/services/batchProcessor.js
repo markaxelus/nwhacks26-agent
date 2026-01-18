@@ -9,7 +9,7 @@
 
 const config = require('../config');
 const { getProvider } = require('./providerFactory');
-const { getAllPersonaInstances } = require('../../simulation_bundle/personaTemplates');
+const { OPENAI_PERSONAS } = require('./oPersonas');
 const { generateCompleteContext, calculateEffectivePriceSensitivity } = require('./contextGenerator');
 const { getEnhancedMemoryState, recordVisit, updateTrustWithEmotion } = require('./enhancedMemory');
 
@@ -70,13 +70,8 @@ async function processBatchedSimulation(price, quality, event, turnNumber = 1) {
   console.log(`[BatchProcessor] Using AI provider: ${provider.getName()}`);
 
   // Determine what personas to use
-  let personasToRun = [];
-  if (provider.getName() === 'openai') {
-    const { OPENAI_PERSONAS } = require('./oPersonas');
-    personasToRun = OPENAI_PERSONAS;
-  } else {
-    personasToRun = getAllPersonaInstances();
-  }
+  // We use the same 20 personas for both providers now for consistency
+  const personasToRun = OPENAI_PERSONAS;
 
   const allResults = [];
   let currentMomentum = null;
