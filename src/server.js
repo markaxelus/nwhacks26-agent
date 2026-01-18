@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('./config');
 const { simulationRateLimiter } = require('./middleware/rateLimiter');
 const simulateRoute = require('./routes/simulate');
+const advancedSimulateRoute = require('./services/advancedSimulate');
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/simulate', simulationRateLimiter, simulateRoute);
+app.use('/api/simulate/advanced', advancedSimulateRoute);
 
 app.get('/', (req, res) => {
   res.json({
