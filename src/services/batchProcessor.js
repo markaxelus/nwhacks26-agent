@@ -61,7 +61,7 @@ function applySocialPressure(persona, baseSensitivity, momentum) {
 /**
  * Process all personas in batches
  */
-async function processBatchedSimulation(price, quality, event, turnNumber = 1) {
+async function processBatchedSimulation(price, quality, event, turnNumber = 1, businessState = {}) {
   console.log(`[BatchProcessor] Starting batched simulation for turn ${turnNumber}`);
   console.log(`[BatchProcessor] Price: $${price}, Quality: ${quality}/10, Event: "${event}"`);
 
@@ -109,8 +109,8 @@ async function processBatchedSimulation(price, quality, event, turnNumber = 1) {
       const { getDecisionContext } = require('./enhancedMemory');
       context.decisionContext = getDecisionContext(persona.id, price);
 
-      // Process persona using provider abstraction
-      return provider.simulatePersona(persona, context, price, quality, currentMomentum, turnNumber, event);
+      // Process persona using provider abstraction with business state
+      return provider.simulatePersona(persona, context, price, quality, currentMomentum, turnNumber, event, businessState);
     });
 
     // Wait for batch to complete

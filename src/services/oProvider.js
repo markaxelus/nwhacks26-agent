@@ -21,7 +21,10 @@ class OpenAIProvider {
   /**
    * Build context message for OpenAI Agent
    */
-  buildContextMessage(persona, context, price, quality, marketMomentum, event) {
+  /**
+   * Build context message for OpenAI Agent
+   */
+  buildContextMessage(persona, context, price, quality, marketMomentum, event, businessState = {}) {
     const memoryState = getEnhancedMemoryState(persona.id);
 
     // Build market momentum context
@@ -59,14 +62,44 @@ ${recentVisits.map((v, i) => `  ${i + 1}. ${v.decision} - felt ${v.emotion} (pri
       routineContext = '\n✓ You have a routine here (5+ consecutive good visits).';
     }
 
+    // --- NEW: BUSINESS & MARKET DATA ---
+    let staffingContext = '';
+    if (businessState.employees && businessState.employees.length > 0) {
+      const totalHours = businessState.employees.reduce((sum, e) => sum + e.hours, 0);
+      const staffNames = businessState.employees.map(e => e.name).join(', ');
+      staffingContext = `
+Staffing Level:
+- Staff on shift: ${staffNames}
+- Service Capacity: ${totalHours} hrs (Speed: ${totalHours > 80 ? 'Very Fast' : totalHours >= 40 ? 'Standard' : 'Slow/Understaffed'})`;
+    }
+
+    let menuContext = '';
+    if (businessState.productChanges && Object.keys(businessState.productChanges).length > 0) {
+      menuContext = `
+Current Menu Prices:
+${Object.entries(businessState.productChanges).map(([item, p]) => `- ${item}: $${p}`).join('\n')}`;
+    }
+
+    let marketingContext = '';
+    if (businessState.marketingTactics && businessState.marketingTactics.length > 0) {
+      marketingContext = `
+Active Promotions:
+- ${businessState.marketingTactics.join('\n- ')}`;
+    }
+
     // Full message (Layer 3: Dynamic Context)
     return `### DYNAMIC SITUATION UPDATE
 Current Context:
-- Price: $${price.toFixed(2)}
+- Average Price Indicator: $${price.toFixed(2)}
 - Your budget remaining: $${context.financial.budgetRemaining.toFixed(2)}
 - Your current mood: ${context.emotional.currentMood}
 - Time pressure: ${context.temporal.isRushing ? 'RUSHING' : 'relaxed'}
 - Current Event: ${event || 'Normal business hours'}
+
+Business Updates:
+${staffingContext || '- Standard staffing levels.'}
+${menuContext || '- Standard menu pricing.'}
+${marketingContext || '- No active promotions.'}
 
 Market Momentum (Social Signal):
 ${momentumContext || '- No clear trend yet.'}
@@ -95,9 +128,10 @@ Decide: Buy, Skip, or Switch.`;
    * @param {Object|null} marketMomentum - Market momentum data
    * @param {number} turnNumber - Current turn number
    * @param {string} event - Current event description
+   * @param {Object} businessState - NEW: Rich business context
    * @returns {Promise<Object>} Decision result
    */
-  async simulatePersona(persona, context, price, quality, marketMomentum, turnNumber, event) {
+  async simulatePersona(persona, context, price, quality, marketMomentum, turnNumber, event, businessState = {}) {
     try {
       const memoryState = getEnhancedMemoryState(persona.id);
       // Get the agent ID for this persona (1:1 mapping now)
@@ -107,7 +141,7 @@ Decide: Buy, Skip, or Switch.`;
       const threadId = await getOrCreateThread(persona.id);
 
       // Build context message
-      const message = this.buildContextMessage(persona, context, price, quality, marketMomentum, event);
+      const message = this.buildContextMessage(persona, context, price, quality, marketMomentum, event, businessState);
 
       // Send message and run agent
       const decision = await sendMessageAndRun(threadId, agentId, message, persona.id);

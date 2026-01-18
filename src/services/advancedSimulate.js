@@ -18,32 +18,19 @@ const router = express.Router();
  * Request validation schema for advanced simulation
  */
 const advancedSimulationSchema = Joi.object({
-  price: Joi.number().positive().required()
-    .messages({
-      'number.base': 'Price must be a number',
-      'number.positive': 'Price must be greater than 0',
-      'any.required': 'Price is required'
-    }),
-  quality: Joi.number().min(1).max(10).required()
-    .messages({
-      'number.base': 'Quality must be a number',
-      'number.min': 'Quality must be between 1 and 10',
-      'number.max': 'Quality must be between 1 and 10',
-      'any.required': 'Quality is required'
-    }),
-  event: Joi.string().min(1).max(200).required()
-    .messages({
-      'string.base': 'Event must be a string',
-      'string.empty': 'Event cannot be empty',
-      'string.max': 'Event description too long (max 200 characters)',
-      'any.required': 'Event is required'
-    }),
-  turnNumber: Joi.number().integer().min(1).optional().default(1)
-    .messages({
-      'number.base': 'Turn number must be a number',
-      'number.integer': 'Turn number must be an integer',
-      'number.min': 'Turn number must be at least 1'
+  employees: Joi.array().items(
+    Joi.object({
+      name: Joi.string(),
+      rate: Joi.number(),
+      hours: Joi.number()
     })
+  ).optional(),
+  marketingTactics: Joi.array().items(Joi.string()).optional(),
+  productChanges: Joi.object().pattern(Joi.string(), Joi.number()).optional(),
+  price: Joi.number().positive().optional(),
+  quality: Joi.number().min(1).max(10).optional(),
+  event: Joi.string().min(1).max(200).optional(),
+  turnNumber: Joi.number().integer().min(1).optional().default(1)
 });
 
 /**
@@ -63,14 +50,43 @@ router.post('/', simulationRateLimiter, async (req, res) => {
       });
     }
 
-    const { price, quality, event, turnNumber } = value;
+    const { employees, marketingTactics, productChanges, price, quality, event, turnNumber } = value;
 
-    console.log(`[AdvancedAPI] Turn ${turnNumber}: price=$${price}, quality=${quality}/10, event="${event}"`);
+    // Derived context if direct parameters are missing
+    let derivedPrice = price;
+    if (!derivedPrice && productChanges) {
+      const prices = Object.values(productChanges);
+      if (prices.length > 0) derivedPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+    }
+    derivedPrice = derivedPrice || 5.0; // Default fallback
+
+    let derivedQuality = quality;
+    if (!derivedQuality && employees) {
+      const totalHours = employees.reduce((acc, emp) => acc + emp.hours, 0);
+      // Baseline 40 hours = 5/10. Every 10 hours add 1.
+      derivedQuality = Math.min(10, Math.max(1, 5 + Math.floor((totalHours - 40) / 10)));
+    }
+    derivedQuality = derivedQuality || 5; // Default fallback
+
+    let derivedEvent = event;
+    if (!derivedEvent && marketingTactics && marketingTactics.length > 0) {
+      derivedEvent = marketingTactics.join(", ");
+    }
+    derivedEvent = derivedEvent || "Regular Business Day";
+
+    console.log(`[AdvancedAPI] Turn ${turnNumber}: price=$${derivedPrice.toFixed(2)}, quality=${derivedQuality}/10, event="${derivedEvent}"`);
 
     const startTime = Date.now();
 
+    // Pass rich business context
+    const businessState = {
+      employees: employees || [],
+      marketingTactics: marketingTactics || [],
+      productChanges: productChanges || {}
+    };
+
     // Run batched simulation
-    const result = await processBatchedSimulation(price, quality, event, turnNumber);
+    const result = await processBatchedSimulation(derivedPrice, derivedQuality, derivedEvent, turnNumber, businessState);
 
     const duration = Date.now() - startTime;
 
@@ -125,9 +141,9 @@ router.post('/', simulationRateLimiter, async (req, res) => {
       success: true,
       turnNumber,
       simulation: {
-        price,
-        quality,
-        event,
+        price: derivedPrice,
+        quality: derivedQuality,
+        event: derivedEvent,
         timestamp: result.metadata.timestamp,
         duration: `${duration}ms`,
         personasAnalyzed: result.summary.totalPersonas,
