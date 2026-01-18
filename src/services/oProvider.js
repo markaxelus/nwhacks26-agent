@@ -87,6 +87,13 @@ Active Promotions:
 - ${businessState.marketingTactics.join('\n- ')}`;
     }
 
+    let competitorContext = '';
+    if (businessState.competitors && businessState.competitors.length > 0) {
+      competitorContext = `
+Nearby Competitors:
+${businessState.competitors.map(c => `- ID ${c.id}: ${c.name} (Location: ${c.x}, ${c.y})`).join('\n')}`;
+    }
+
     // Full message (Layer 3: Dynamic Context)
     return `### DYNAMIC SITUATION UPDATE
 Current Context:
@@ -104,6 +111,8 @@ ${marketingContext || '- No active promotions.'}
 Market Momentum (Social Signal):
 ${momentumContext || '- No clear trend yet.'}
 
+${competitorContext || '- No known competitors nearby.'}
+
 History & Memory:
 - Trust in this brand: ${memoryState.trust_score}/100
 ${historyContext}${warningContext}${routineContext}
@@ -116,7 +125,15 @@ Behavioral Constraints (Internal Stats):
 - Effective price sensitivity (this turn): ${(context.effectivePriceSensitivity * 100).toFixed(0)}%
 ${context.decisionContext.pricePerception ? `- Price feels: ${context.decisionContext.pricePerception.perception}` : ''}
 
-Decide: Buy, Skip, or Switch.`;
+Decide: Buy, Skip, or Switch.
+CRITICAL: If you choose "Switch", you MUST select a specific competitor from the list above. Return your response as JSON:
+{
+  "decision": "Buy" | "Skip" | "Switch",
+  "reasoning": "your reasoning here",
+  "emotion": "one word emotion",
+  "pricePerception": "cheap" | "fair" | "expensive",
+  "targetId": number (ONLY if Switching, the ID of the competitor you are going to)
+}`;
   }
 
   /**

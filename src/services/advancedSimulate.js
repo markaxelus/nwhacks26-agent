@@ -25,6 +25,14 @@ const advancedSimulationSchema = Joi.object({
       hours: Joi.number()
     })
   ).optional(),
+  competitors: Joi.array().items(
+    Joi.object({
+      id: Joi.number().required(),
+      name: Joi.string().required(),
+      x: Joi.number().required(),
+      y: Joi.number().required()
+    })
+  ).optional(),
   marketingTactics: Joi.array().items(Joi.string()).optional(),
   productChanges: Joi.object().pattern(Joi.string(), Joi.number()).optional(),
   price: Joi.number().positive().optional(),
@@ -50,7 +58,7 @@ router.post('/', simulationRateLimiter, async (req, res) => {
       });
     }
 
-    const { employees, marketingTactics, productChanges, price, quality, event, turnNumber } = value;
+    const { employees, competitors, marketingTactics, productChanges, price, quality, event, turnNumber } = value;
 
     // Derived context if direct parameters are missing
     let derivedPrice = price;
@@ -81,6 +89,7 @@ router.post('/', simulationRateLimiter, async (req, res) => {
     // Pass rich business context
     const businessState = {
       employees: employees || [],
+      competitors: competitors || [],
       marketingTactics: marketingTactics || [],
       productChanges: productChanges || {}
     };
@@ -242,3 +251,4 @@ router.get('/memory/:personaId', (req, res) => {
 });
 
 module.exports = router;
+
