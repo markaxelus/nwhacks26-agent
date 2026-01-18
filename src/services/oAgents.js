@@ -10,7 +10,7 @@
  * 4. Paste the IDs into AGENT_IDS below
  */
 
-const config = require('../../config');
+const config = require('../config');
 
 /**
  * 20 OpenAI Agent IDs (1:1 mapping with personas)

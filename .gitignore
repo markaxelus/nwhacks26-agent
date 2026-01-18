@@ -24,6 +24,7 @@ coverage/
 *.swp
 *.swo
 *~
+simulation_results.json
 
 # OS
 .DS_Store
