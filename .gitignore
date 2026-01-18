@@ -14,7 +14,7 @@ yarn-error.log*
 
 # Data (persona memory)
 data/
-
+simulation_bundle/
 # Testing
 coverage/
 
