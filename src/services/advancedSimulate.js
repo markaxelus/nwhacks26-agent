@@ -11,6 +11,7 @@ const Joi = require('joi');
 const { processBatchedSimulation } = require('./batchProcessor');
 const { simulationRateLimiter } = require('../middleware/rateLimiter');
 const { getEnhancedMemoryState } = require('./enhancedMemory');
+const { generateInsight } = require('./gemini');
 
 const router = express.Router();
 
@@ -112,9 +113,25 @@ router.post('/', simulationRateLimiter, async (req, res) => {
     const pricePerceptionBreakdown = {};
     const trustDistribution = { low: 0, medium: 0, high: 0 };
 
+    // Map ID to Competitor for easy lookup
+    const competitorMap = new Map();
+    if (employees || competitors) { // Ensure we have scope
+      if (businessState.competitors) {
+        businessState.competitors.forEach(c => competitorMap.set(c.id, c));
+      }
+    }
+
     for (const personaResult of result.results) {
       // Skip personas that failed
       if (personaResult.error) continue;
+
+      // --- SPATIAL LOGIC ---
+      personaResult.position = calculatePosition(
+        personaResult.decision,
+        personaResult.targetId,
+        personaResult.emotion,
+        competitorMap
+      );
 
       // Emotion breakdown
       emotionBreakdown[personaResult.emotion] = (emotionBreakdown[personaResult.emotion] || 0) + 1;
@@ -145,10 +162,21 @@ router.post('/', simulationRateLimiter, async (req, res) => {
     // Market mood label
     const marketMoodLabel = getMarketMoodLabel(result.momentum);
 
+    // Generate AI Summary & Insights
+    let aiInsight = "Detailed insights not available.";
+    try {
+      console.log(`[AdvancedAPI] Generating AI insights...`);
+      // We pass the full results to let Gemini analyze the reasonings
+      aiInsight = await generateInsight(result.results, result.summary, businessState);
+    } catch (err) {
+      console.error("[AdvancedAPI] Insight generation failed:", err);
+    }
+
     // Build response
     const response = {
       success: true,
       turnNumber,
+      aiInsight, // High-level executive summary
       simulation: {
         price: derivedPrice,
         quality: derivedQuality,
@@ -215,6 +243,53 @@ function getMarketMoodLabel(momentum) {
   if (momentum.staying >= 0.55) return 'Optimistic';
   if (momentum.leaving >= 0.55) return 'Skeptical';
   return 'Balanced';
+}
+
+/**
+ * Calculate spatial position on 100x100 canvas (x: -50 to 50, y: -50 to 50)
+ */
+function calculatePosition(decision, targetId, emotion, competitorMap) {
+  const getRandomOffset = (radius) => {
+    const r = Math.random() * radius;
+    const theta = Math.random() * 2 * Math.PI;
+    return {
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta)
+    };
+  };
+
+  // Case 1: BUY -> Go to Home (0,0) with tight cluster
+  if (decision === 'Buy') {
+    const offset = getRandomOffset(15); // Within 15px
+    return { x: offset.x, y: offset.y };
+  }
+
+  // Case 2: SWITCH -> Go to Competitor
+  if (decision === 'Switch' && targetId && competitorMap.has(targetId)) {
+    const comp = competitorMap.get(targetId);
+    const offset = getRandomOffset(15); // Within 15px of competitor
+    return {
+      x: comp.x + offset.x,
+      y: comp.y + offset.y
+    };
+  }
+
+  // Case 3: SKIP -> "Halfway" or "Middle of nowhere"
+  // Neutral/Satisfied but skipped -> Loitering nearby (20-35px)
+  // Angry/Frustrated -> Leaving far away (40-50px)
+  const isAngry = ['frustrated', 'angry', 'betrayed', 'annoyed'].includes(emotion?.toLowerCase());
+
+  if (isAngry) {
+    // Edge of canvas (40-50px radius)
+    const r = 40 + Math.random() * 10;
+    const theta = Math.random() * 2 * Math.PI;
+    return { x: r * Math.cos(theta), y: r * Math.sin(theta) };
+  } else {
+    // "Halfway" / Loitering (20-35px radius)
+    const r = 20 + Math.random() * 15;
+    const theta = Math.random() * 2 * Math.PI;
+    return { x: r * Math.cos(theta), y: r * Math.sin(theta) };
+  }
 }
 
 /**
