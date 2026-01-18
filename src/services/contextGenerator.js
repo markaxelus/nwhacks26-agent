@@ -179,27 +179,12 @@ function generateSituationalContext(persona) {
  * @param {Object} persona - Persona instance
  * @param {Object} memoryState - Persona's memory state
  * @param {number} turnNumber - Current simulation turn
- * @param {string} event - Current event
  * @returns {Object} Complete context
  */
-function generateCompleteContext(persona, memoryState, turnNumber = 1, event = '') {
+function generateCompleteContext(persona, memoryState, turnNumber = 1) {
   const financial = generateFinancialContext(persona, turnNumber);
   const temporal = generateTemporalContext(persona, turnNumber);
-
-  // Event-based temporal overrides
-  if (event && event.toLowerCase().includes('rush')) {
-    temporal.isRushing = true;
-  }
-
   const emotional = generateEmotionalContext(persona, temporal, memoryState);
-
-  // Event-based emotional overrides
-  if (event && event.toLowerCase().includes('crisis')) {
-    emotional.currentMood = 'bad';
-    emotional.moodIndex = 1;
-    emotional.isBadMood = true;
-  }
-
   const situational = generateSituationalContext(persona);
 
   // Determine if first visit

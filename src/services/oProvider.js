@@ -21,7 +21,7 @@ class OpenAIProvider {
   /**
    * Build context message for OpenAI Agent
    */
-  buildContextMessage(persona, context, price, quality, marketMomentum, event) {
+  buildContextMessage(persona, context, price, quality, marketMomentum) {
     const memoryState = getEnhancedMemoryState(persona.id);
 
     // Build market momentum context
@@ -59,31 +59,36 @@ ${recentVisits.map((v, i) => `  ${i + 1}. ${v.decision} - felt ${v.emotion} (pri
       routineContext = '\n✓ You have a routine here (5+ consecutive good visits).';
     }
 
-    // Full message (Layer 3: Dynamic Context)
-    return `### DYNAMIC SITUATION UPDATE
-Current Context:
+    // Full message
+    return `You are making a purchasing decision RIGHT NOW.
+
+Current Situation:
 - Price: $${price.toFixed(2)}
-- Your budget remaining: $${context.financial.budgetRemaining.toFixed(2)}
+- Quality: ${quality}/10
 - Your current mood: ${context.emotional.currentMood}
+- Budget remaining: $${context.financial.budgetRemaining.toFixed(2)}
+- Trust in this place: ${memoryState.trust_score}/100
 - Time pressure: ${context.temporal.isRushing ? 'RUSHING' : 'relaxed'}
-- Current Event: ${event || 'Normal business hours'}
-
-Market Momentum (Social Signal):
-${momentumContext || '- No clear trend yet.'}
-
-History & Memory:
-- Trust in this brand: ${memoryState.trust_score}/100
+${momentumContext}
 ${historyContext}${warningContext}${routineContext}
 
-Behavioral Constraints (Internal Stats):
+Your Personality Traits:
 - Price sensitivity: ${(persona.priceSensitivity * 100).toFixed(0)}%
 - Brand loyalty: ${(persona.brandLoyalty * 100).toFixed(0)}%
 - Social influence: ${(persona.socialInfluenceWeight * 100).toFixed(0)}%
 - Quality focus: ${(persona.qualityThreshold * 100).toFixed(0)}%
-- Effective price sensitivity (this turn): ${(context.effectivePriceSensitivity * 100).toFixed(0)}%
+
+Price Perception:
+- Your effective price sensitivity right now: ${(context.effectivePriceSensitivity * 100).toFixed(0)}%
 ${context.decisionContext.pricePerception ? `- Price feels: ${context.decisionContext.pricePerception.perception}` : ''}
 
-Decide: Buy, Skip, or Switch.`;
+Make your decision (Buy, Skip, or Switch) and respond with ONLY valid JSON in this exact format:
+{
+  "decision": "Buy" | "Skip" | "Switch",
+  "reasoning": "your internal thought process in 1-2 sentences",
+  "emotion": "satisfied" | "frustrated" | "angry" | "happy" | "neutral" | "anxious",
+  "pricePerception": "cheap" | "fair" | "expensive" | "outrageous"
+}`;
   }
 
   /**
@@ -94,12 +99,10 @@ Decide: Buy, Skip, or Switch.`;
    * @param {number} quality - Current quality
    * @param {Object|null} marketMomentum - Market momentum data
    * @param {number} turnNumber - Current turn number
-   * @param {string} event - Current event description
    * @returns {Promise<Object>} Decision result
    */
-  async simulatePersona(persona, context, price, quality, marketMomentum, turnNumber, event) {
+  async simulatePersona(persona, context, price, quality, marketMomentum, turnNumber) {
     try {
-      const memoryState = getEnhancedMemoryState(persona.id);
       // Get the agent ID for this persona (1:1 mapping now)
       const agentId = getAgentIdForPersona(persona.id);
 
@@ -107,7 +110,7 @@ Decide: Buy, Skip, or Switch.`;
       const threadId = await getOrCreateThread(persona.id);
 
       // Build context message
-      const message = this.buildContextMessage(persona, context, price, quality, marketMomentum, event);
+      const message = this.buildContextMessage(persona, context, price, quality, marketMomentum);
 
       // Send message and run agent
       const decision = await sendMessageAndRun(threadId, agentId, message, persona.id);
@@ -122,20 +125,11 @@ Decide: Buy, Skip, or Switch.`;
         personaName: persona.name,
         archetype: persona.archetype,
         ...decision,
-        personaDetails: {
-          backstory: persona.description,
-          quirks: persona.quirks,
-          stats: {
-            priceSensitivity: persona.priceSensitivity,
-            brandLoyalty: persona.brandLoyalty,
-            socialInfluence: persona.socialInfluenceWeight,
-            qualityFocus: persona.qualityThreshold
-          }
-        },
         context: {
           mood: context.emotional.currentMood,
           budgetRemaining: context.financial.budgetRemaining,
-          trust: memoryState.trust_score
+          isRushing: context.temporal.isRushing,
+          trust: getEnhancedMemoryState(persona.id).trust_score
         }
       };
 

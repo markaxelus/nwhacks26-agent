@@ -105,15 +105,15 @@ router.post('/', simulationRateLimiter, async (req, res) => {
     }
 
     // Get memory states for additional insights
-    const permanentlyGoneCount = Array.from({ length: 20 }, (_, i) => i + 1)
+    const permanentlyGoneCount = Array.from({ length: 50 }, (_, i) => i + 1)
       .map(id => getEnhancedMemoryState(id))
       .filter(state => state.flags.isPermanentlyGone).length;
 
-    const onLastChanceCount = Array.from({ length: 20 }, (_, i) => i + 1)
+    const onLastChanceCount = Array.from({ length: 50 }, (_, i) => i + 1)
       .map(id => getEnhancedMemoryState(id))
       .filter(state => state.flags.isOnLastChance).length;
 
-    const hasRoutineCount = Array.from({ length: 20 }, (_, i) => i + 1)
+    const hasRoutineCount = Array.from({ length: 50 }, (_, i) => i + 1)
       .map(id => getEnhancedMemoryState(id))
       .filter(state => state.experienceTracking.hasRoutine).length;
 
@@ -154,9 +154,9 @@ router.post('/', simulationRateLimiter, async (req, res) => {
         }, 0) / result.summary.totalPersonas
       },
       metadata: {
-        batchSize: 10,
+        batchSize: 12,
         batchesProcessed: result.metadata.batchesProcessed,
-        aiProvider: result.metadata.aiProvider || 'openai',
+        aiProvider: result.metadata.aiProvider || 'gemini', // Which AI provider was used
         systemVersion: 'Phase 4 - Advanced Archetype System'
       }
     };
@@ -200,10 +200,10 @@ router.get('/memory/:personaId', (req, res) => {
   try {
     const personaId = parseInt(req.params.personaId);
 
-    if (isNaN(personaId) || personaId < 1 || personaId > 20) {
+    if (isNaN(personaId) || personaId < 1 || personaId > 50) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid persona ID. Must be between 1 and 20.'
+        error: 'Invalid persona ID. Must be between 1 and 50.'
       });
     }
 
