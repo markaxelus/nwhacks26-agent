@@ -7,6 +7,13 @@ const config = {
     maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS) || 8192,
     timeoutMs: parseInt(process.env.GEMINI_TIMEOUT_MS) || 60000
   },
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY,
+    timeoutMs: parseInt(process.env.OPENAI_TIMEOUT_MS) || 60000
+  },
+  ai: {
+    provider: process.env.AI_PROVIDER || 'gemini' // 'gemini' or 'openai'
+  },
   server: {
     port: parseInt(process.env.PORT) || 3000,
     nodeEnv: process.env.NODE_ENV || 'development'
@@ -18,8 +25,15 @@ const config = {
 };
 
 
-if (!config.gemini.apiKey) {
-  console.error('ERROR: GEMINI_API_KEY is required in .env file');
+if (!config.gemini.apiKey && config.ai.provider === 'gemini') {
+  console.error('ERROR: GEMINI_API_KEY is required in .env file for Gemini provider');
+  if (config.server.nodeEnv !== 'test') {
+    process.exit(1);
+  }
+}
+
+if (!config.openai.apiKey && config.ai.provider === 'openai') {
+  console.error('ERROR: OPENAI_API_KEY is required in .env file for OpenAI provider');
   if (config.server.nodeEnv !== 'test') {
     process.exit(1);
   }
