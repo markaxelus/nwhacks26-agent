@@ -3,7 +3,7 @@
  */
 
 const OpenAI = require('openai');
-const config = require('../../config');
+const config = require('../config');
 
 let openaiClient = null;
 
