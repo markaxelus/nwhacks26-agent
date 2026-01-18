@@ -11,7 +11,6 @@ const Joi = require('joi');
 const { processBatchedSimulation } = require('./batchProcessor');
 const { simulationRateLimiter } = require('../middleware/rateLimiter');
 const { getEnhancedMemoryState } = require('./enhancedMemory');
-const { saveToHistory } = require('./history');
 
 const router = express.Router();
 
@@ -164,9 +163,6 @@ router.post('/', simulationRateLimiter, async (req, res) => {
 
     console.log(`[AdvancedAPI] Completed in ${duration}ms: ${result.summary.buyCount} buy, ${result.summary.skipCount} skip, ${result.summary.switchCount} switch`);
     console.log(`[AdvancedAPI] Market mood: ${marketMoodLabel}, Brand health: ${permanentlyGoneCount} permanently gone, ${onLastChanceCount} on last chance`);
-
-    // Save to history for frontend visualization
-    saveToHistory(response);
 
     res.status(200).json(response);
 
