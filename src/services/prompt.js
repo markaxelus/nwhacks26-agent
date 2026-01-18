@@ -1,7 +1,5 @@
-
-
 const { getAllPersonas } = require('./persona');
-const { getMemoryState, applyTrustModifier, checkGrudgeEffect } = require('./personaMemory');
+const { getMemoryState, applyTrustModifier, checkGrudgeEffect } = require('./memory');
 
 
 function buildBatchPrompt(price, event, options = {}) {
