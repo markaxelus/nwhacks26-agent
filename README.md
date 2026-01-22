@@ -3,7 +3,7 @@
 **LocalLens** empowers small business owners to simulate pricing decisions before they go live. Using AI-driven customer personas, it visualizes how real customers might react—balancing revenue growth with loyalty, trust, and churn.
 
 
-https://github.com/user-attachments/assets/cdf58605-0533-4136-945c-13e7565a2cf8
+https://github.com/user-attachments/assets/be0dd495-d8c2-47b4-bca8-726c12a1181e
 
 
 ---
